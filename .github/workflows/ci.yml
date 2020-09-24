@@ -4,7 +4,9 @@ on: [push, pull_request]
 
 jobs:
 
-  job:
+  job_1:
+
+    name: Build and Test
 
     strategy:
       matrix:
@@ -33,3 +35,38 @@ jobs:
     - run: npm test
       env:
         CI: true
+
+  job_2:
+
+    name: Deploy to gh-pages
+
+    needs: job_1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show branch
+        env:
+          BRANCH: ${{github.ref}}
+        run: echo "$BRANCH"
+
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          persist-credentials: false
+
+      - name: Install and Build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@3.6.1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: .
+          CLEAN_EXCLUDE: ['README.md', 'dist', 'docs', 'src', 'test']
