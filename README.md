@@ -1,4 +1,4 @@
-[![build and test](https://github.com/webmachinelearning/webnn-polyfill/workflows/build%20and%20test/badge.svg)](https://github.com/webmachinelearning/webnn-polyfill/actions)
+[![build and test](https://github.com/BruceDai/webnn-polyfill/workflows/build%20and%20test/badge.svg)](https://github.com/BruceDai/webnn-polyfill/actions)
 
 # WebNN Polyfill
 
