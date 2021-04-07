@@ -1,24 +1,22 @@
 import * as tf from '@tensorflow/tfjs-core';
 
-import {ReduceOptions} from '../model_builder';
-import {Operand} from '../operand';
+import {MLReduceOptions} from '../graph_builder';
+import {MLOperand} from '../operand';
 import {SingleOutputOperation} from '../operation';
 import * as utils from '../utils';
 
 abstract class Reduce extends SingleOutputOperation {
-  private input_: Operand;
+  private input_: MLOperand;
   private axes_?: number[];
   private keepDimensions_?: boolean;
 
-  constructor(input: Operand, options: ReduceOptions = {}) {
+  constructor(input: MLOperand, options: MLReduceOptions = {}) {
     super(input.builder);
     utils.validateOperand(input);
     this.input_ = input;
     if (options.axes !== undefined) {
-      utils.assert(
-          utils.isIntegerArray(options.axes) &&
-              options.axes.every(v => v > 0 || v === -1),
-          'The starts parameter is invalid.');
+      utils.assert(utils.isIntegerArray(options.axes),
+          'The axes parameter is invalid.');
       this.axes_ = options.axes;
     } else {
       this.axes_ = undefined;
@@ -33,13 +31,15 @@ abstract class Reduce extends SingleOutputOperation {
     }
   }
 
-  inputs(): Operand[] {
+  inputs(): MLOperand[] {
     return [this.input_];
   }
 
-  run(inputTensors: Map<Operand, tf.Tensor>): tf.Tensor {
+  run(inputTensors: Map<MLOperand, tf.Tensor>): tf.Tensor {
     const input: tf.Tensor = inputTensors.get(this.input_);
-    // tf.mean accepts axis range [-r, r)
+    // accepts axis range [-r, r)
+    utils.assert(utils.validateAxes(this.axes_, input.rank),
+        `The axes must be in range [-${input.rank}, ${input.rank})`);
     return this.runOp(input, this.axes_, this.keepDimensions_);
   }
 

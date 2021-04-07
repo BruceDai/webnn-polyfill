@@ -1,17 +1,17 @@
 import * as tf from '@tensorflow/tfjs-core';
 
-import {Operand} from '../operand';
+import {MLOperand} from '../operand';
 import {SingleOutputOperation} from '../operation';
 import * as utils from '../utils';
 
 export class Slice extends SingleOutputOperation {
-  private input_: Operand;
+  private input_: MLOperand;
   private starts_: number[];
   private sizes_: number[];
   private axes_?: number[];
 
   constructor(
-      input: Operand, starts: number[], sizes: number[], axes?: number[]) {
+      input: MLOperand, starts: number[], sizes: number[], axes?: number[]) {
     super(input.builder);
     utils.validateOperand(input);
     this.input_ = input;
@@ -20,14 +20,14 @@ export class Slice extends SingleOutputOperation {
     this.starts_ = starts;
     utils.assert(
         utils.isIntegerArray(sizes) && sizes.every(v => v > 0 || v === -1),
-        'The starts parameter is invalid.');
+        'The sizes parameter is invalid.');
     this.sizes_ = sizes;
     utils.assert(
         sizes.length === sizes.length,
         'The length of sizes is not equal to the length of sizes.))');
     utils.assert(
         axes === undefined || utils.isIntegerArray(axes),
-        'The starts parameter is invalid.');
+        'The axes parameter is invalid.');
     if (axes !== undefined) {
       utils.assert(
           sizes.length === axes.length, 'The length of axes is invalid.))');
@@ -35,11 +35,11 @@ export class Slice extends SingleOutputOperation {
     this.axes_ = axes;
   }
 
-  inputs(): Operand[] {
+  inputs(): MLOperand[] {
     return [this.input_];
   }
 
-  run(inputTensors: Map<Operand, tf.Tensor>): tf.Tensor {
+  run(inputTensors: Map<MLOperand, tf.Tensor>): tf.Tensor {
     const input: tf.Tensor4D = inputTensors.get(this.input_) as tf.Tensor4D;
     const rank = input.shape.length;
     if (this.axes_ === undefined) {
